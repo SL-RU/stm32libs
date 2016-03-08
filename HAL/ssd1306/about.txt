@@ -1,5 +1,3 @@
 library for 0.96 oled display for STM32 microcontrollers using HAL drivers.
 
 Folder - example project for Keil and STM32CubeMX
-
-http://lyra.flutterpony.org/stm32/2016/03/08/Library-ssd1306-stm32.html
