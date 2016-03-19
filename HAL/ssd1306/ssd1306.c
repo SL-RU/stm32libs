@@ -115,7 +115,7 @@ void SSD1306_UpdateScreen(void) {
 		SSD1306_WRITECOMMAND(0x10);
 		
 		/* Write multi data */
-		ssd1306_I2C_WriteMulti(SSD1306_I2C_ADDR, 0x40, &SSD1306_Buffer[SSD1306_WIDTH * m], SSD1306_WIDTH);
+		ssd1306_I2C_WriteMulti(SSD1306_I2C_ADDR, 0x40, &SSD1306_Buffer[SSD1306_WIDTH * m], SSD1306_WIDTH+1);
 	}
 }
 
@@ -131,12 +131,12 @@ void SSD1306_ToggleInvert(void) {
 	}
 }
 
-void SSD1306_Fill(SSD1306_COLOR_t color) {
+void SSD1306_Fill(uint8_t color) {
 	/* Set memory */
 	memset(SSD1306_Buffer, (color == SSD1306_COLOR_BLACK) ? 0x00 : 0xFF, sizeof(SSD1306_Buffer));
 }
 
-void SSD1306_DrawPixel(uint16_t x, uint16_t y, SSD1306_COLOR_t color) {
+void SSD1306_DrawPixel(uint16_t x, uint16_t y, uint8_t color) {
 	if (
 		x >= SSD1306_WIDTH ||
 		y >= SSD1306_HEIGHT
@@ -147,7 +147,7 @@ void SSD1306_DrawPixel(uint16_t x, uint16_t y, SSD1306_COLOR_t color) {
 	
 	/* Check if pixels are inverted */
 	if (SSD1306.Inverted) {
-		color = (SSD1306_COLOR_t)!color;
+		color = (uint8_t)!color;
 	}
 	
 	/* Set color */
@@ -164,27 +164,19 @@ void SSD1306_GotoXY(uint16_t x, uint16_t y) {
 	SSD1306.CurrentY = y;
 }
 
-char SSD1306_Putc(char ch, FontDef_t* Font, SSD1306_COLOR_t color) {
+char SSD1306_Putc(char ch, FontDef_t* Font, uint8_t color) {
 	uint32_t i, b, j;
 	
-	/* Check available space in LCD */
-	if (
-		SSD1306_WIDTH <= (SSD1306.CurrentX + Font->FontWidth) ||
-		SSD1306_HEIGHT <= (SSD1306.CurrentY + Font->FontHeight)
-	) {
-		/* Error */
-		return 0;
-	}
-	
+	b = 0;
 	/* Go through font */
 	for (i = 0; i < Font->FontHeight; i++) {
-		b = Font->data[(ch - 32) * Font->FontHeight + i];
 		for (j = 0; j < Font->FontWidth; j++) {
-			if ((b << j) & 0x8000) {
-				SSD1306_DrawPixel(SSD1306.CurrentX + j, (SSD1306.CurrentY + i), (SSD1306_COLOR_t) color);
+			if ((Font->data[ch*Font->CharBytes + b/8] >> b%8) & 1) {
+				SSD1306_DrawPixel(SSD1306.CurrentX + j, (SSD1306.CurrentY + i), (uint8_t) color);
 			} else {
-				SSD1306_DrawPixel(SSD1306.CurrentX + j, (SSD1306.CurrentY + i), (SSD1306_COLOR_t)!color);
+				SSD1306_DrawPixel(SSD1306.CurrentX + j, (SSD1306.CurrentY + i), (uint8_t)!color);
 			}
+			b++;
 		}
 	}
 	
@@ -195,7 +187,7 @@ char SSD1306_Putc(char ch, FontDef_t* Font, SSD1306_COLOR_t color) {
 	return ch;
 }
 
-char SSD1306_Puts(char* str, FontDef_t* Font, SSD1306_COLOR_t color) {
+char SSD1306_Puts(char* str, FontDef_t* Font, uint8_t color) {
 	/* Write characters */
 	while (*str) {
 		/* Write character by character */
@@ -213,7 +205,7 @@ char SSD1306_Puts(char* str, FontDef_t* Font, SSD1306_COLOR_t color) {
 }
  
 
-void SSD1306_DrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, SSD1306_COLOR_t c) {
+void SSD1306_DrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t c) {
 	int16_t dx, dy, sx, sy, err, e2, i, tmp; 
 	
 	/* Check for overflow */
@@ -297,7 +289,7 @@ void SSD1306_DrawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, SSD130
 	}
 }
 
-void SSD1306_DrawRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, SSD1306_COLOR_t c) {
+void SSD1306_DrawRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t c) {
 	/* Check input parameters */
 	if (
 		x >= SSD1306_WIDTH ||
@@ -322,7 +314,7 @@ void SSD1306_DrawRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, SSD13
 	SSD1306_DrawLine(x + w, y, x + w, y + h, c); /* Right line */
 }
 
-void SSD1306_DrawFilledRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, SSD1306_COLOR_t c) {
+void SSD1306_DrawFilledRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t c) {
 	uint8_t i;
 	
 	/* Check input parameters */
@@ -349,7 +341,7 @@ void SSD1306_DrawFilledRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h,
 	}
 }
 
-void SSD1306_DrawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, SSD1306_COLOR_t color) {
+void SSD1306_DrawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
 	/* Draw lines */
 	SSD1306_DrawLine(x1, y1, x2, y2, color);
 	SSD1306_DrawLine(x2, y2, x3, y3, color);
@@ -357,7 +349,7 @@ void SSD1306_DrawTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, ui
 }
 
 
-void SSD1306_DrawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, SSD1306_COLOR_t color) {
+void SSD1306_DrawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t x3, uint16_t y3, uint8_t color) {
 	int16_t deltax = 0, deltay = 0, x = 0, y = 0, xinc1 = 0, xinc2 = 0, 
 	yinc1 = 0, yinc2 = 0, den = 0, num = 0, numadd = 0, numpixels = 0, 
 	curpixel = 0;
@@ -413,7 +405,7 @@ void SSD1306_DrawFilledTriangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t 
 	}
 }
 
-void SSD1306_DrawCircle(int16_t x0, int16_t y0, int16_t r, SSD1306_COLOR_t c) {
+void SSD1306_DrawCircle(int16_t x0, int16_t y0, int16_t r, uint8_t c) {
 	int16_t f = 1 - r;
 	int16_t ddF_x = 1;
 	int16_t ddF_y = -2 * r;
@@ -447,7 +439,7 @@ void SSD1306_DrawCircle(int16_t x0, int16_t y0, int16_t r, SSD1306_COLOR_t c) {
     }
 }
 
-void SSD1306_DrawFilledCircle(int16_t x0, int16_t y0, int16_t r, SSD1306_COLOR_t c) {
+void SSD1306_DrawFilledCircle(int16_t x0, int16_t y0, int16_t r, uint8_t c) {
 	int16_t f = 1 - r;
 	int16_t ddF_x = 1;
 	int16_t ddF_y = -2 * r;
