@@ -469,7 +469,22 @@ void SSD1306_DrawFilledCircle(int16_t x0, int16_t y0, int16_t r, uint8_t c) {
         SSD1306_DrawLine(x0 + y, y0 - x, x0 - y, y0 - x, c);
     }
 }
- 
+
+void ssd1306_image(uint8_t *img, uint8_t x, uint8_t y)
+{
+	uint32_t i, b, j;
+	
+	b = 0;
+	/* Go through font */
+	for (i = 0; i < img[1]; i++) {
+		for (j = 0; j < img[0]; j++) {
+
+			SSD1306_DrawPixel(x + j, (y + i), (uint8_t) (img[b/8 + 2] >> (b%8)) & 1);
+			b++;
+		}
+	}
+}
+
 void SSD1306_ON(void) {
 	SSD1306_WRITECOMMAND(0x8D);  
 	SSD1306_WRITECOMMAND(0x14);  

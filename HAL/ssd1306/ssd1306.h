@@ -219,7 +219,16 @@ void SSD1306_DrawCircle(int16_t x0, int16_t y0, int16_t r, uint8_t c);
  */
 void SSD1306_DrawFilledCircle(int16_t x0, int16_t y0, int16_t r, uint8_t c);
 
-
+/**
+ * @brief  Writes multi bytes to slave
+ * @param  *I2Cx: I2C used
+ * @param  address: 7 bit slave address, left aligned, bits 7:1 are used, LSB bit is not used
+ * @param  reg: register to write to
+ * @param  *data: pointer to data array to write it to slave
+ * @param  count: how many bytes will be written
+ * @retval None
+ */
+void ssd1306_image(uint8_t *img, uint8_t x, uint8_t y);
 
 #ifndef ssd1306_I2C_TIMEOUT
 #define ssd1306_I2C_TIMEOUT					20000
@@ -254,7 +263,6 @@ void ssd1306_I2C_Write(uint8_t address, uint8_t reg, uint8_t data);
  * @retval None
  */
 void ssd1306_I2C_WriteMulti(uint8_t address, uint8_t reg, uint8_t *data, uint16_t count);
-
 
 
 /* C++ detection */

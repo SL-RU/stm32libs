@@ -26,11 +26,12 @@ void keyboard_init()
 {
 	HAL_ADC_Start(&hadc1);
 	HAL_ADC_Start_DMA(&keyboard_hadc, (uint32_t*)keyboard_ADC_values , 2);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 }
+
 
 void keyboard_update()
 {
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10, GPIO_PIN_SET);
 	HAL_ADC_Start_DMA(&keyboard_hadc, (uint32_t*)keyboard_ADC_values , 2);
 	int8_t cul = keyboard_adc_to_lvl(keyboard_ADC_values[0]),
 		cur = keyboard_adc_to_lvl(keyboard_ADC_values[1]);
@@ -45,7 +46,7 @@ void keyboard_update()
 	
 	keyboard_lastLeftLvl = cul;
 	keyboard_lastRightLvl = cur;
-	printf("l %04i r %04i\n", keyboard_ADC_values[0], keyboard_ADC_values[1]);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10, GPIO_PIN_RESET);
 }
 
 
