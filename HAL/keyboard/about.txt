@@ -1,1 +1,0 @@
-example: https://github.com/SL-RU/stm32_file_viewer/
