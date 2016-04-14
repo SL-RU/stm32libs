@@ -1,0 +1,9 @@
+library for 0.96 oled display for STM32 microcontrollers using HAL drivers.
+
+Folder - example project for Keil and STM32CubeMX
+
+You can generate own font using: https://github.com/SL-RU/sfam_generator
+
+https://www.youtube.com/watch?v=L5MuP8ykXdY
+http://lyra.flutterpony.org/stm32/2016/03/08/Library-ssd1306-stm32.html
+example: https://github.com/SL-RU/stm32_file_viewer/

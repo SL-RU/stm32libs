@@ -1,0 +1,25 @@
+#include "fonts.h"
+#include "ssd1306.h"
+
+#define def_Font Font_7x10
+
+void gui_lable(char* str, int x, int y, uint8_t back, uint8_t border);
+
+void gui_lable_int(int32_t str, int x, int y, uint8_t back, uint8_t border);
+
+void gui_button(char* str, int x, int y, uint8_t pressed);
+
+void gui_msg(char* text, void* ok, void *canc);
+
+void gui_draw(void);
+
+void gui_draw_header(void);
+void gui_draw_app(void);
+void gui_draw_sys(void);
+void gui_draw_msg(void);
+
+void gui_input(uint8_t button);
+
+void gui_input_msg(void);
+void gui_input_sys(void);
+void gui_input_app(void);
