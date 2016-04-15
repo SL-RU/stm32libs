@@ -2,7 +2,7 @@
 
 uint16_t keyboard_adcLevels[] = {540, 1080, 1630, 2210, 2960, 4020};
 
-uint16_t keyboard_ADC_values[2];
+uint32_t keyboard_ADC_values[40];
 int8_t keyboard_lastKey = -1,
 	keyboard_lastLeftLvl = -1,
 	keyboard_lastRightLvl = -1;
@@ -24,22 +24,20 @@ void keyboard_setPressHandler(void (*KeyPressHandler)(int8_t))
 
 void keyboard_init()
 {
-	HAL_ADC_Start(&hadc1);
-	HAL_ADC_Start_DMA(&keyboard_hadc, (uint32_t*)keyboard_ADC_values , 2);
+	HAL_ADC_Start(&keyboard_hadc);
+	HAL_ADC_Start_DMA(&keyboard_hadc, keyboard_ADC_values , 40);
+	HAL_GPIO_WritePin(keyboard_on, GPIO_PIN_SET);
 }
 
 
 void keyboard_update()
 {
-	HAL_GPIO_WritePin(keyboard_on, GPIO_PIN_SET);
-	HAL_ADC_Start_DMA(&keyboard_hadc, (uint32_t*)keyboard_ADC_values , 2);
 	int8_t cul = keyboard_adc_to_lvl(keyboard_ADC_values[0]),
 		cur = keyboard_adc_to_lvl(keyboard_ADC_values[1]), 
 		kll = keyboard_lastLeftLvl, klr = keyboard_lastRightLvl;
 	
 	keyboard_lastLeftLvl = cul;
 	keyboard_lastRightLvl = cur;
-	HAL_GPIO_WritePin(keyboard_on, GPIO_PIN_RESET);
 	
 	if(kll == -1 && klr == -1 &&
 			(cul >= 0 || cur >= 0))

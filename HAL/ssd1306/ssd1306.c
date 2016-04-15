@@ -30,7 +30,7 @@
 #define ABS(x)   ((x) > 0 ? (x) : -(x))
 
 /* SSD1306 data buffer */
-static uint8_t SSD1306_Buffer[SSD1306_WIDTH * SSD1306_HEIGHT / 8];
+static uint8_t SSD1306_Buffer_all[SSD1306_WIDTH * SSD1306_HEIGHT / 8 + 1], *SSD1306_Buffer = SSD1306_Buffer_all + 1;
 
 /* Private SSD1306 structure */
 typedef struct {
@@ -107,15 +107,11 @@ uint8_t SSD1306_Init(void) {
 }
 
 void SSD1306_UpdateScreen(void) {
-	uint8_t m;
-	
-	for (m = 0; m < 8; m++) {
-		SSD1306_WRITECOMMAND(0xB0 + m);
-		SSD1306_WRITECOMMAND(0x00);
-		SSD1306_WRITECOMMAND(0x10);
-		
-		/* Write multi data */
-		ssd1306_I2C_WriteMulti(SSD1306_I2C_ADDR, 0x40, &SSD1306_Buffer[SSD1306_WIDTH * m], SSD1306_WIDTH+1);
+	SSD1306_Buffer_all[0] = 0x40;
+	HAL_I2C_Master_Transmit_DMA(&hi2c1, SSD1306_I2C_ADDR, SSD1306_Buffer_all, SSD1306_WIDTH * SSD1306_HEIGHT / 8 + 1);
+	while(HAL_DMA_GetState(hi2c1.hdmatx) != HAL_DMA_STATE_READY)
+	{
+		HAL_Delay(1); //Change for your RTOS
 	}
 }
 
@@ -133,7 +129,7 @@ void SSD1306_ToggleInvert(void) {
 
 void SSD1306_Fill(uint8_t color) {
 	/* Set memory */
-	memset(SSD1306_Buffer, (color == SSD1306_COLOR_BLACK) ? 0x00 : 0xFF, sizeof(SSD1306_Buffer));
+	memset(SSD1306_Buffer, (color == SSD1306_COLOR_BLACK) ? 0x00 : 0xFF, SSD1306_WIDTH * SSD1306_HEIGHT / 8);
 }
 
 void SSD1306_DrawPixel(uint16_t x, uint16_t y, uint8_t color) {
@@ -529,6 +525,12 @@ void ssd1306_I2C_WriteMulti(uint8_t address, uint8_t reg, uint8_t* data, uint16_
 	for(i = 1; i <= count; i++)
 		dt[i] = data[i-1];
 	HAL_I2C_Master_Transmit(&hi2c1, address, dt, count, 10);
+}
+
+
+void ssd1306_I2C_WriteMulti_DMA(uint8_t address, uint8_t reg, uint8_t* data, uint16_t count) {	
+	HAL_I2C_Master_Transmit(&hi2c1, address, &reg, 1, 100);
+	HAL_I2C_Master_Transmit_DMA(&hi2c1, address, data, count);
 }
 
 

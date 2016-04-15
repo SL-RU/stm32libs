@@ -13,7 +13,9 @@ extern C {
 #define keyboard_hadc hadc1
 #define keyboard_adcDeltaError 150
 
-
+#define keyboard_on GPIOB, GPIO_PIN_2
+	
+	
 void keyboard_init(void);
 
 void keyboard_update(void);
